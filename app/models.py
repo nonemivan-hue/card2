@@ -205,12 +205,22 @@ def get_employee_by_login(login):
     return find_one("employees", lambda e: e.get("login") == login)
 
 
+def update_employee(emp_id, updates, user_id=None):
+    """Обновить данные сотрудника."""
+    result = update("employees", lambda e: e.get("id") == emp_id, updates)
+    if user_id:
+        log_action(user_id, "UPDATE_EMPLOYEE", f"Updated employee {emp_id}")
+    return result
+
+
 def check_permission(employee, resource, level="view"):
     """Check if employee has permission for resource at given level."""
-    if "admin" in employee.get("roles", []):
+    # Admin имеет полный доступ ко всем ресурсам
+    if employee.get("role") == "admin":
         return True
+    
     perms = employee.get("permissions", {})
-    resource_perm = perms.get(resource, "")
+    resource_perm = perms.get(resource, "none")
     
     # Полный доступ дает все права
     if resource_perm == "full":
@@ -220,7 +230,7 @@ def check_permission(employee, resource, level="view"):
     if level == "view":
         return resource_perm in ["view", "edit", "create", "unpost", "full"]
     if level == "edit":
-        return resource_perm in ["edit", "create", "full"]
+        return resource_perm in ["edit", "create", "unpost", "full"]
     if level == "create":
         return resource_perm in ["create", "full"]
     if level == "unpost":

@@ -293,11 +293,13 @@ def ref_cards_history(card_id):
     
     history = get_card_history(card.get("card_number", ""))
     employees = {e["id"]: e for e in get_employees()}
+    card_types = {ct["id"]: ct for ct in get_card_types()}
     
     return render_template("refs/cards_history.html", 
                            card=card, 
                            history=history, 
-                           employees=employees)
+                           employees=employees,
+                           card_types=card_types)
 
 
 # ============== REFERENCE: CARD TYPES ==============

@@ -610,6 +610,77 @@ def settings_access():
                            access_levels=ACCESS_LEVELS)
 
 
+# ============== SETTINGS: ROLES ==============
+@app.route("/settings/roles", methods=["GET", "POST"])
+@login_required
+@admin_required
+def ref_roles():
+    """Справочник ролей."""
+    if request.method == "POST" and "name" in request.form:
+        # Создаем новую роль с пустыми правами
+        role_data = {
+            "id": f"role_{uuid.uuid4().hex[:8]}",
+            "name": request.form.get("name", ""),
+            "description": request.form.get("description", ""),
+            "permissions": {},
+            "created_at": now_iso()
+        }
+        create_role(role_data, session["user_id"])
+        flash("Роль добавлена", "success")
+        return redirect(url_for("ref_roles"))
+    
+    items = get_roles()
+    return render_template("settings/roles.html", items=items, access_levels=ACCESS_LEVELS)
+
+
+@app.route("/settings/roles/delete/<item_id>", methods=["POST"])
+@login_required
+@admin_required
+def ref_roles_delete(item_id):
+    """Удаление роли."""
+    delete_role(item_id, session["user_id"])
+    flash("Роль удалена", "success")
+    return redirect(url_for("ref_roles"))
+
+
+@app.route("/settings/roles/edit/<item_id>", methods=["GET", "POST"])
+@login_required
+@admin_required
+def ref_roles_edit(item_id):
+    """Редактирование роли и настройка прав доступа."""
+    role = get_role_by_id(item_id)
+    if not role:
+        flash("Роль не найдена", "danger")
+        return redirect(url_for("ref_roles"))
+    
+    if request.method == "POST":
+        name = request.form.get("name", "")
+        description = request.form.get("description", "")
+        
+        # Собираем права доступа из всех вкладок
+        permissions = {}
+        # Справочники
+        for res_key in ["cards", "card_types", "owners", "applicants", "organizations", "mfcs", "employees"]:
+            permissions[res_key] = request.form.get(f"perm_{res_key}", "none")
+        # Документы
+        for res_key in ["documents_receipt", "documents_defect", "documents_print", "documents_issue", 
+                        "documents_transfer_mfc", "documents_transfer_region", "documents_return_mfc"]:
+            permissions[res_key] = request.form.get(f"perm_{res_key}", "none")
+        # Отчеты
+        permissions["reports"] = request.form.get("perm_reports", "none")
+        
+        updates = {
+            "name": name,
+            "description": description,
+            "permissions": permissions
+        }
+        update_role(item_id, updates, session["user_id"])
+        flash("Роль обновлена", "success")
+        return redirect(url_for("ref_roles"))
+    
+    return render_template("settings/roles.html", items=[role], access_levels=ACCESS_LEVELS, edit_mode=True, edit_role=role)
+
+
 @app.route("/api/employees", methods=["GET", "POST"])
 @login_required
 @admin_required

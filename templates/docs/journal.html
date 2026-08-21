@@ -57,7 +57,7 @@
                     <td>{{ emp_map.get(item.created_by, {}).full_name if item.created_by else '—' }}</td>
                     <td>
                         <a href="{{ url_for('doc_edit', doc_id=item.id) }}" class="btn btn-sm btn-outline-primary">Открыть</a>
-                        {% if item.status == 'posted' %}
+                        {% if item.status == 'posted' and (is_admin or check_permission(item.doc_type, 'unpost') or check_permission(item.doc_type, 'full')) %}
                         <form method="POST" action="{{ url_for('doc_unpost_route', doc_id=item.id) }}" style="display:inline;" onsubmit="return confirm('Отменить проведение документа?');">
                             <button type="submit" class="btn btn-sm btn-outline-warning">Отмена проведения</button>
                         </form>

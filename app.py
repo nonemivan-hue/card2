@@ -88,6 +88,11 @@ def inject_globals():
     user = None
     if "user_id" in session:
         user = get_employee_by_id(session["user_id"])
+    
+    # Функция проверки прав для использования в шаблонах
+    def can_access(resource, level="view"):
+        return check_permission(user, resource, level) if user else False
+    
     return {
         "card_statuses": CARD_STATUSES,
         "document_types": DOCUMENT_TYPES,
@@ -95,7 +100,9 @@ def inject_globals():
         "is_admin": user and user.get("role") == "admin",
         "is_issue_user": is_issue_user(),
         "access_resources": ACCESS_RESOURCES,
-        "access_levels": ACCESS_LEVELS
+        "access_levels": ACCESS_LEVELS,
+        "can_access": can_access,
+        "check_permission": lambda r, l="view": check_permission(user, r, l) if user else False
     }
 
 

@@ -21,15 +21,16 @@
                     <i class="bi bi-printer"></i> Реестр внесения в комплекс
                 </a>
                 {% endif %}
-                {% if doc.status == 'posted' %}
+                {% if doc.status == 'posted' and (is_admin or check_permission(doc.doc_type, 'unpost') or check_permission(doc.doc_type, 'full')) %}
                 <form method="POST" action="{{ url_for('doc_unpost_route', doc_id=doc.id) }}" onsubmit="return confirm('Отменить проведение документа?');" style="display:inline;">
                     <button type="submit" class="btn btn-warning"><i class="bi bi-x-circle"></i> Отмена проведения</button>
                 </form>
-                {% else %}
+                {% elif doc.status != 'posted' and (is_admin or check_permission(doc.doc_type, 'edit') or check_permission(doc.doc_type, 'create') or check_permission(doc.doc_type, 'full')) %}
                 <form method="POST" action="{{ url_for('doc_post_route', doc_id=doc.id) }}" onsubmit="return confirm('Провести документ?');" style="display:inline;">
                     <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Провести</button>
                 </form>
                 {% endif %}
+                {% if is_admin or check_permission(doc.doc_type, 'edit') or check_permission(doc.doc_type, 'full') %}
                 <form method="POST" action="{{ url_for('doc_delete_route', doc_id=doc.id) }}" onsubmit="return confirm('Удалить документ?');" style="display:inline;">
                     <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Удалить</button>
                 </form>

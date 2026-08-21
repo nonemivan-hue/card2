@@ -209,7 +209,7 @@ def change_password():
         flash("Пароль изменен", "success")
         return redirect(url_for("index"))
 
-    return render_template("change_password.html", target_user=target_user, is_admin=is_admin)
+    return render_template("change_password.html", target_user=target_user, is_admin=is_admin_user)
 
 
 # ============== REFERENCE: CARDS ==============

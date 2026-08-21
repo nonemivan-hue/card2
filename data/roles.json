@@ -1,0 +1,71 @@
+[
+  {
+    "id": "role_admin_001",
+    "name": "Администратор",
+    "description": "Полный доступ ко всем функциям системы",
+    "permissions": {
+      "cards": "full",
+      "card_types": "full",
+      "owners": "full",
+      "applicants": "full",
+      "organizations": "full",
+      "mfcs": "full",
+      "employees": "full",
+      "documents_receipt": "full",
+      "documents_defect": "full",
+      "documents_print": "full",
+      "documents_issue": "full",
+      "documents_transfer_mfc": "full",
+      "documents_transfer_region": "full",
+      "documents_return_mfc": "full",
+      "reports": "full"
+    },
+    "created_at": "2026-08-21T00:00:00.000000"
+  },
+  {
+    "id": "role_user_001",
+    "name": "Пользователь",
+    "description": "Базовый доступ к просмотру и редактированию карт и документов",
+    "permissions": {
+      "cards": "edit",
+      "card_types": "view",
+      "owners": "edit",
+      "applicants": "edit",
+      "organizations": "view",
+      "mfcs": "view",
+      "employees": "none",
+      "documents_receipt": "create",
+      "documents_defect": "create",
+      "documents_print": "create",
+      "documents_issue": "create",
+      "documents_transfer_mfc": "create",
+      "documents_transfer_region": "create",
+      "documents_return_mfc": "create",
+      "reports": "view"
+    },
+    "created_at": "2026-08-21T00:00:00.000000"
+  },
+  {
+    "id": "role_issue_001",
+    "name": "Выдающий",
+    "description": "Доступ только к выдаче карт и передаче в МФЦ",
+    "permissions": {
+      "cards": "view",
+      "card_types": "none",
+      "owners": "view",
+      "applicants": "edit",
+      "organizations": "none",
+      "mfcs": "view",
+      "employees": "none",
+      "documents_receipt": "none",
+      "documents_defect": "none",
+      "documents_print": "none",
+      "documents_issue": "create",
+      "documents_transfer_mfc": "create",
+      "documents_transfer_region": "none",
+      "documents_return_mfc": "create",
+      "reports": "view"
+    },
+    "created_at": "2026-08-21T00:00:00.000000"
+  }
+]

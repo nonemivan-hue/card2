@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Справочник ролей - Учет транспортных карт{% endblock %}
+{% block page_title %}Справочник: Роли{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-header bg-white">
+        <strong><i class="bi bi-plus-circle"></i> Добавить роль</strong>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('ref_roles') }}" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Наименование роли</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">Описание</label>
+                <input type="text" name="description" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white">Список ролей</div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr><th style="width:25%">Наименование</th><th style="width:50%">Описание</th><th style="width:15%">Права доступа</th><th style="width:10%"></th></tr></thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td><strong>{{ item.name }}</strong></td>
+                    <td>{{ item.description or '' }}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalPermissions{{ item.id }}">
+                            <i class="bi bi-shield-lock"></i> Настроить права
+                        </button>
+                    </td>
+                    <td class="d-flex gap-1">
+                        <form method="POST" action="{{ url_for('ref_roles_delete', item_id=item.id) }}" onsubmit="return confirm('Удалить роль?');">
+                            <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                
+                <!-- Modal для настройки прав -->
+                <div class="modal fade" id="modalPermissions{{ item.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Права доступа: {{ item.name }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('ref_roles_edit', item_id=item.id) }}">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Наименование роли</label>
+                                        <input type="text" name="name" class="form-control" value="{{ item.name }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Описание</label>
+                                        <input type="text" name="description" class="form-control" value="{{ item.description or '' }}">
+                                    </div>
+                                    
+                                    <ul class="nav nav-tabs" role="tablist">
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-bs-toggle="tab" href="#tabs-sprav{{ item.id }}">Справочники</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="tab" href="#tabs-docs{{ item.id }}">Документы</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="tab" href="#tabs-reports{{ item.id }}">Отчеты</a>
+                                        </li>
+                                    </ul>
+                                    
+                                    <div class="tab-content mt-3">
+                                        <!-- Вкладка Справочники -->
+                                        <div class="tab-pane fade show active" id="tabs-sprav{{ item.id }}">
+                                            <table class="table table-bordered">
+                                                <thead><tr><th>Ресурс</th><th>Уровень доступа</th></tr></thead>
+                                                <tbody>
+                                                    {% for res_key, res_name in [('cards', 'Карты'), ('card_types', 'Виды карт'), ('owners', 'ФИО владельцев'), ('applicants', 'ФИО заявителей'), ('organizations', 'Организации'), ('mfcs', 'МФЦ'), ('employees', 'Сотрудники')] %}
+                                                    <tr>
+                                                        <td>{{ res_name }}</td>
+                                                        <td>
+                                                            <select name="perm_{{ res_key }}" class="form-select">
+                                                                {% for lvl_key, lvl_name in access_levels.items() %}
+                                                                <option value="{{ lvl_key }}" {% if item.permissions.get(res_key) == lvl_key %}selected{% endif %}>{{ lvl_name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        <!-- Вкладка Документы -->
+                                        <div class="tab-pane fade" id="tabs-docs{{ item.id }}">
+                                            <table class="table table-bordered">
+                                                <thead><tr><th>Ресурс</th><th>Уровень доступа</th></tr></thead>
+                                                <tbody>
+                                                    {% for res_key, res_name in [('documents_receipt', 'Прием карт'), ('documents_defect', 'Брак'), ('documents_print', 'Печать карт'), ('documents_issue', 'Выдача карт'), ('documents_transfer_mfc', 'Передача в МФЦ'), ('documents_transfer_region', 'Передача в регион'), ('documents_return_mfc', 'Возврат из МФЦ')] %}
+                                                    <tr>
+                                                        <td>{{ res_name }}</td>
+                                                        <td>
+                                                            <select name="perm_{{ res_key }}" class="form-select">
+                                                                {% for lvl_key, lvl_name in access_levels.items() %}
+                                                                <option value="{{ lvl_key }}" {% if item.permissions.get(res_key) == lvl_key %}selected{% endif %}>{{ lvl_name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        
+                                        <!-- Вкладка Отчеты -->
+                                        <div class="tab-pane fade" id="tabs-reports{{ item.id }}">
+                                            <table class="table table-bordered">
+                                                <thead><tr><th>Ресурс</th><th>Уровень доступа</th></tr></thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Все отчеты</td>
+                                                        <td>
+                                                            <select name="perm_reports" class="form-select">
+                                                                {% for lvl_key, lvl_name in access_levels.items() %}
+                                                                <option value="{{ lvl_key }}" {% if item.permissions.get('reports') == lvl_key %}selected{% endif %}>{{ lvl_name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Сохранить</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <tr><td colspan="4" class="text-center text-muted py-4">Нет данных</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

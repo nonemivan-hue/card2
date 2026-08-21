@@ -65,7 +65,14 @@ def admin_required(f):
             flash("Необходима авторизация", "warning")
             return redirect(url_for("login"))
         user = get_employee_by_id(session["user_id"])
-        if not user or "admin" not in user.get("roles", []):
+        if not user:
+            flash("Доступ запрещен", "danger")
+            return redirect(url_for("index"))
+        # Проверяем роль администратора через role_id или через roles (для совместимости)
+        role_id = user.get("role_id", "")
+        roles = user.get("roles", [])
+        is_admin = role_id == "role_admin_001" or "admin" in roles
+        if not is_admin:
             flash("Доступ запрещен", "danger")
             return redirect(url_for("index"))
         return f(*args, **kwargs)
@@ -89,11 +96,19 @@ def inject_globals():
     user = None
     if "user_id" in session:
         user = get_employee_by_id(session["user_id"])
+    
+    # Определяем администратора по role_id или по roles (для совместимости)
+    is_admin = False
+    if user:
+        role_id = user.get("role_id", "")
+        roles = user.get("roles", [])
+        is_admin = role_id == "role_admin_001" or "admin" in roles
+    
     return {
         "card_statuses": CARD_STATUSES,
         "document_types": DOCUMENT_TYPES,
         "current_user": user,
-        "is_admin": user and "admin" in user.get("roles", []),
+        "is_admin": is_admin,
         "is_issue_user": is_issue_user(),
         "access_resources": ACCESS_RESOURCES,
         "access_levels": ACCESS_LEVELS
@@ -146,9 +161,17 @@ def logout():
 def change_password():
     user = get_employee_by_id(session["user_id"])
     target_id = request.args.get("user_id") or request.form.get("user_id")
+    
+    # Определяем администратора по role_id или по roles (для совместимости)
+    is_admin_user = False
+    if user:
+        role_id = user.get("role_id", "")
+        roles = user.get("roles", [])
+        is_admin_user = role_id == "role_admin_001" or "admin" in roles
+    
     # Admin can change any password; regular users only their own
     if target_id and target_id != session["user_id"]:
-        if not user or "admin" not in user.get("roles", []):
+        if not is_admin_user:
             flash("Доступ запрещен", "danger")
             return redirect(url_for("index"))
         target_user = get_employee_by_id(target_id)
@@ -168,7 +191,7 @@ def change_password():
         from werkzeug.security import check_password_hash, generate_password_hash
         
         # Non-admin must provide correct old password
-        if "admin" not in user.get("roles", []):
+        if not is_admin_user:
             if not check_password_hash(target_user.get("password_hash", ""), old_password):
                 flash("Неверный текущий пароль", "danger")
                 return redirect(url_for("change_password", user_id=target_id))
@@ -186,7 +209,7 @@ def change_password():
         flash("Пароль изменен", "success")
         return redirect(url_for("index"))
 
-    return render_template("change_password.html", target_user=target_user, is_admin="admin" in user.get("roles", []))
+    return render_template("change_password.html", target_user=target_user, is_admin=is_admin)
 
 
 # ============== REFERENCE: CARDS ==============
@@ -250,7 +273,16 @@ def ref_cards_delete(card_id):
 def ref_cards_edit(card_id):
     """Редактирование карты (только для admin)."""
     user = get_employee_by_id(session["user_id"])
-    if not user or "admin" not in user.get("roles", []):
+    if not user:
+        flash("Доступ запрещен. Требуется роль администратора.", "danger")
+        return redirect(url_for("ref_cards"))
+    
+    # Определяем администратора по role_id или по roles (для совместимости)
+    role_id = user.get("role_id", "")
+    roles = user.get("roles", [])
+    is_admin_user = role_id == "role_admin_001" or "admin" in roles
+    
+    if not is_admin_user:
         flash("Доступ запрещен. Требуется роль администратора.", "danger")
         return redirect(url_for("ref_cards"))
     
@@ -334,7 +366,16 @@ def ref_card_types_delete(item_id):
 def ref_card_types_edit(item_id):
     """Редактирование вида карты."""
     user = get_employee_by_id(session["user_id"])
-    if not user or "admin" not in user.get("roles", []):
+    if not user:
+        flash("Доступ запрещен. Требуется роль администратора.", "danger")
+        return redirect(url_for("ref_card_types"))
+    
+    # Определяем администратора по role_id или по roles (для совместимости)
+    role_id = user.get("role_id", "")
+    roles = user.get("roles", [])
+    is_admin_user = role_id == "role_admin_001" or "admin" in roles
+    
+    if not is_admin_user:
         flash("Доступ запрещен. Требуется роль администратора.", "danger")
         return redirect(url_for("ref_card_types"))
     
@@ -469,7 +510,16 @@ def ref_mfcs_delete(item_id):
 def ref_mfcs_edit(item_id):
     """Редактирование МФЦ."""
     user = get_employee_by_id(session["user_id"])
-    if not user or "admin" not in user.get("roles", []):
+    if not user:
+        flash("Доступ запрещен. Требуется роль администратора.", "danger")
+        return redirect(url_for("ref_mfcs"))
+    
+    # Определяем администратора по role_id или по roles (для совместимости)
+    role_id = user.get("role_id", "")
+    roles = user.get("roles", [])
+    is_admin_user = role_id == "role_admin_001" or "admin" in roles
+    
+    if not is_admin_user:
         flash("Доступ запрещен. Требуется роль администратора.", "danger")
         return redirect(url_for("ref_mfcs"))
     

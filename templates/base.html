@@ -145,6 +145,9 @@
             <a class="nav-link {% if request.endpoint == 'ref_employees' %}active{% endif %}" href="{{ url_for('ref_employees') }}">
                 <i class="bi bi-person-gear"></i> Сотрудники
             </a>
+            <a class="nav-link {% if request.endpoint == 'ref_roles' %}active{% endif %}" href="{{ url_for('ref_roles') }}">
+                <i class="bi bi-person-badge"></i> Роли
+            </a>
             <a class="nav-link {% if request.endpoint == 'settings_access' %}active{% endif %}" href="{{ url_for('settings_access') }}">
                 <i class="bi bi-shield-lock"></i> Настройка прав доступа
             </a>

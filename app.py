@@ -509,20 +509,21 @@ def api_mfcs():
 @admin_required
 def ref_employees():
     if request.method == "POST":
-        role = request.form.get("role", "user")  # Изменено с roles на role
+        role_id = request.form.get("role_id")  # Теперь используем role_id из справочника ролей
         password = request.form.get("password", "")
         from werkzeug.security import generate_password_hash
         insert("employees", {
             "full_name": request.form.get("full_name", ""),
             "login": request.form.get("login", ""),
             "password_hash": generate_password_hash(password) if password else "",
-            "role": role,
+            "role_id": role_id,
             "permissions": {}
         })
         flash("Сотрудник добавлен", "success")
         return redirect(url_for("ref_employees"))
     items = get_employees()
-    return render_template("refs/employees.html", items=items, access_resources=ACCESS_RESOURCES, access_levels=ACCESS_LEVELS)
+    roles = get_roles()
+    return render_template("refs/employees.html", items=items, roles=roles, access_resources=ACCESS_RESOURCES, access_levels=ACCESS_LEVELS)
 
 
 @app.route("/refs/employees/delete/<item_id>", methods=["POST"])
@@ -548,7 +549,7 @@ def ref_employees_edit(item_id):
         full_name = request.form.get("full_name", "")
         login = request.form.get("login", "")
         password = request.form.get("password", "")
-        role = request.form.get("role", "user")  # Изменено с roles на role
+        role_id = request.form.get("role_id")  # Теперь используем role_id из справочника ролей
         
         # Собираем права доступа к документам
         permissions = {}
@@ -559,7 +560,7 @@ def ref_employees_edit(item_id):
         updates = {
             "full_name": full_name,
             "login": login,
-            "role": role  # Изменено с roles на role
+            "role_id": role_id
         }
         if password:
             from werkzeug.security import generate_password_hash
@@ -570,8 +571,10 @@ def ref_employees_edit(item_id):
         flash("Сотрудник обновлен", "success")
         return redirect(url_for("ref_employees"))
     
+    roles = get_roles()
     return render_template("refs/employees_edit.html", 
                            employee=employee, 
+                           roles=roles,
                            access_resources=ACCESS_RESOURCES, 
                            access_levels=ACCESS_LEVELS)
 
@@ -1601,7 +1604,11 @@ def constants():
     const = constants_list[0] if constants_list else {"organization_name": ""}
     if request.method == "POST":
         update("constants", lambda c: c.get("id") == const.get("id"), {
-            "organization_name": request.form.get("organization_name", "")
+            "organization_name": request.form.get("organization_name", ""),
+            "auto_backup_enabled": request.form.get("auto_backup_enabled") == "on",
+            "backup_schedule": request.form.get("backup_schedule", "daily"),
+            "backup_time": request.form.get("backup_time", "02:00"),
+            "backup_retention_days": int(request.form.get("backup_retention_days", 30))
         })
         flash("Константы сохранены", "success")
         return redirect(url_for("constants"))

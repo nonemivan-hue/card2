@@ -5,11 +5,39 @@
 <div class="card">
     <div class="card-body">
         <form method="POST">
+            <h6 class="border-bottom pb-2 mb-3"><i class="bi bi-building"></i> Организация</h6>
             <div class="mb-3">
                 <label class="form-label">Наименование нашей организации</label>
                 <input type="text" name="organization_name" class="form-control" value="{{ const.organization_name }}">
             </div>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Сохранить</button>
+            
+            <h6 class="border-bottom pb-2 mb-3 mt-4"><i class="bi bi-cloud-arrow-up"></i> Автоматическое резервное копирование</h6>
+            <div class="mb-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="auto_backup_enabled" id="auto_backup_enabled" {% if const.auto_backup_enabled %}checked{% endif %}>
+                    <label class="form-check-label" for="auto_backup_enabled">Включить автоматическое резервное копирование</label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Периодичность создания резервных копий</label>
+                <select name="backup_schedule" class="form-select">
+                    <option value="daily" {% if const.backup_schedule == 'daily' %}selected{% endif %}>Ежедневно</option>
+                    <option value="weekly" {% if const.backup_schedule == 'weekly' %}selected{% endif %}>Еженедельно</option>
+                    <option value="monthly" {% if const.backup_schedule == 'monthly' %}selected{% endif %}>Ежемесячно</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Время создания резервной копии (часы:минуты)</label>
+                <input type="time" name="backup_time" class="form-control" value="{{ const.backup_time or '02:00' }}">
+                <div class="form-text">Резервная копия будет создаваться автоматически в указанное время</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Хранить резервные копии (дней)</label>
+                <input type="number" name="backup_retention_days" class="form-control" value="{{ const.backup_retention_days or 30 }}" min="1" max="365">
+                <div class="form-text">Копии старше указанного периода будут удаляться автоматически</div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-save"></i> Сохранить</button>
         </form>
     </div>
 </div>

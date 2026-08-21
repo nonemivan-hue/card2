@@ -3,148 +3,131 @@
     "full_name": "Трощенко Иван Александрович",
     "login": "Админ",
     "password": "3831043",
-    "roles": [
-      "user",
-      "admin"
-    ],
     "permissions": {},
     "id": "af61323e-78e0-45ff-9f97-552d4f880da7",
-    "created_at": "2026-08-12T09:50:57.376099"
+    "created_at": "2026-08-12T09:50:57.376099",
+    "role_id": "role_admin_001",
+    "password_hash": "scrypt:32768:8:1$XLQiwK0zBJYopL4i$65f8332e8d616b55adcf6f38bd0162433b9b55ee0395fd44b84d4f809644932813230a0c88592af4dfbad035553b9e51efe9baa3d41d2d5f3cace821327db0dd"
   },
   {
     "full_name": "Харлампиди Е.С.",
     "login": "Харлампиди",
     "password": "12345",
-    "roles": [
-      "user"
-    ],
     "permissions": {},
     "id": "3b5223bf-c70c-47c9-960a-ac40ac91e7a9",
-    "created_at": "2026-08-12T09:51:35.768792"
+    "created_at": "2026-08-12T09:51:35.768792",
+    "role_id": "role_user_001",
+    "password_hash": "scrypt:32768:8:1$0HxEFvI0Ndsi2VHZ$8b9c78a02fe126f643f602b594c912fb967e180848634a2de5274ad2d0e8c14b2eb588f2845469222ef8b835c187c8adcd67e7493212a08bc07a9c48259f5627"
   },
   {
     "full_name": "Маркарова Т.А.",
     "login": "Маркарова",
     "password": "12345",
-    "roles": [
-      "user"
-    ],
     "permissions": {},
     "id": "e5876379-6f03-4add-9608-1e026401fd97",
-    "created_at": "2026-08-16T00:37:48.151904"
+    "created_at": "2026-08-16T00:37:48.151904",
+    "role_id": "role_user_001",
+    "password_hash": "scrypt:32768:8:1$ocvSj04KJs5oiSCG$4bc19cafdee0e36a86d7f462c9353fa378382e9a83e9ea2f739384780af1d37a0c4110df1df6e44641045db2781650b46ef7fc81cdef1e19f6a55b90baf2cb5e"
   },
   {
     "full_name": "Костенко И.В.",
     "login": "Костенко",
     "password": "12345",
-    "roles": [
-      "issue"
-    ],
     "permissions": {},
     "id": "c3324cc6-ed73-425e-89de-e665c815f099",
-    "created_at": "2026-08-17T09:05:17.331760"
+    "created_at": "2026-08-17T09:05:17.331760",
+    "role_id": "role_issue_001",
+    "password_hash": "scrypt:32768:8:1$rdNeNwjsVnaUiwFg$dc48ab324ad3b0c5d919d4b69668b959def2216934f36492c74d4b8e56d2dd70a4ebdf5c90bec6e10d10b602dcc5ec2ccedfa322ccc0bd4621086decd14cf036"
   },
   {
     "full_name": "Фролова И.В.",
     "login": "Фролова",
     "password": "12345",
-    "roles": [
-      "user",
-      "issue"
-    ],
     "permissions": {},
     "id": "f179e90d-7988-4976-a6ed-32999c98c8d0",
-    "created_at": "2026-08-17T09:11:43.177213"
+    "created_at": "2026-08-17T09:11:43.177213",
+    "role_id": "role_issue_001",
+    "password_hash": "scrypt:32768:8:1$6rAzr5ozoRUlLcH8$7c5a6d57f113be89375210cb75e86ebd02b783e13b5b06f1c7ccc33e120c665e2391244dd537b4f7515edb32943ca699b648cc053503e033f3086f5eca76ec05"
   },
   {
     "full_name": "Василенко Н.В.",
     "login": "Василенко",
     "password": "007",
-    "roles": [
-      "user",
-      "issue"
-    ],
     "permissions": {},
     "id": "7eff3d69-5f25-4984-9bb8-345010f1f0e2",
     "created_at": "2026-08-17T09:13:05.872145",
-    "updated_at": "2026-08-17T09:18:42.068256"
+    "updated_at": "2026-08-17T09:18:42.068256",
+    "role_id": "role_issue_001",
+    "password_hash": "scrypt:32768:8:1$uo8ZbJTjwgGR1GPf$2465fe8afc55d10502367b18e62c7b08b481fe1717e3317f62e024231c30daf3fa64e2d0b44352ff9bab23c738d7fcb7a71cc2cdb7aaec862a492758616c1ad4"
   },
   {
     "full_name": "Ивлева Н.А.",
     "login": "Ивлева",
     "password": "12345",
-    "roles": [
-      "user",
-      "issue"
-    ],
     "permissions": {},
     "id": "1707d18a-eb98-4a19-be34-d587f7a50520",
-    "created_at": "2026-08-17T10:47:38.981083"
+    "created_at": "2026-08-17T10:47:38.981083",
+    "role_id": "role_issue_001",
+    "password_hash": "scrypt:32768:8:1$Z4HROCm3qQ5wOaR7$cdf85a427fb63f8473e59e05b928174396dbde5150574d653e842a904d582422b5d09b2c9ccb76daaebd49def26696ed2745f5fe2314752a346bb0f9820e703a"
   },
   {
     "full_name": "Барбалюк О.С.",
     "login": "Барбалюк",
     "password": "12345",
-    "roles": [
-      "issue"
-    ],
     "permissions": {},
     "id": "7be5e829-9c85-4cfc-b35f-492d23cef8cc",
-    "created_at": "2026-08-17T18:14:30.584581"
+    "created_at": "2026-08-17T18:14:30.584581",
+    "role_id": "role_issue_001",
+    "password_hash": "scrypt:32768:8:1$uUyg5CKzUepaSsuP$fc16420ed1ae0854a9f7a26d91484e518efdc1b14f58fe265d8bb01208927e3cca5e0622f438a5bc97bc2d0df666b50195213f813c4a0d6677b32e25261bb539"
   },
   {
     "full_name": "Волотко К.В.",
     "login": "Волотко",
     "password": "12345",
-    "roles": [
-      "issue"
-    ],
     "permissions": {},
     "id": "89ef56d2-9bcd-4675-814e-2d0fb9ba8111",
-    "created_at": "2026-08-17T18:15:00.345136"
+    "created_at": "2026-08-17T18:15:00.345136",
+    "role_id": "role_issue_001",
+    "password_hash": "scrypt:32768:8:1$lnjVsseJtPQbqdWk$be933078db5e5c96422f946d02778d19340a28eb45d9963c1e400fa820fb883807ebf012742ad3d19213d13f2b25313f75228cc599c080aedba0b5366be166ec"
   },
   {
     "full_name": "Тарасюк Е.А.",
     "login": "Тарасюк",
     "password": "12345",
-    "roles": [
-      "issue"
-    ],
     "permissions": {},
     "id": "9d487354-efa3-43d0-9dc6-7c948b9cb182",
-    "created_at": "2026-08-17T18:15:45.169131"
+    "created_at": "2026-08-17T18:15:45.169131",
+    "role_id": "role_issue_001",
+    "password_hash": "scrypt:32768:8:1$hiDo0OErAwSwXlOH$db88b15d8e480eedd23889ae936992567e9b31d9e431a5591e7b7bf4999c6c9430bb4582ec09f364d264ee2fadaa295109361f2cc9992931f9efa7dfc91cd871"
   },
   {
     "full_name": "Тыртычная В.А.",
     "login": "Тыртычная",
     "password": "12345",
-    "roles": [
-      "issue"
-    ],
     "permissions": {},
     "id": "f2efc63e-ebbb-47f6-a74e-9a73903c2464",
-    "created_at": "2026-08-17T18:16:12.364737"
+    "created_at": "2026-08-17T18:16:12.364737",
+    "role_id": "role_issue_001",
+    "password_hash": "scrypt:32768:8:1$XxwX3ydBRI0NMgf5$1647b3b8a734e082d7d967023d01f37201e6a4270f9ffb3d332e3096dbbafff776869ea3efe56a3aac62b9496a2fc415600647a50f8d9aa13b48c5260415e684"
   },
   {
     "full_name": "Фролова И.В.",
     "login": "Фролова",
     "password": "12345",
-    "roles": [
-      "user"
-    ],
     "permissions": {},
     "id": "fbdc0383-943d-4ffb-a56b-aa9d96471638",
-    "created_at": "2026-08-17T18:16:36.339293"
+    "created_at": "2026-08-17T18:16:36.339293",
+    "role_id": "role_user_001",
+    "password_hash": "scrypt:32768:8:1$uea1g1fCuyzbX0B5$4e764b09b2c657103071ca845ee2a40bc1616b1cc705e76c45cc6f116b5618796b0deb0c0a98f5b82470c50b1ec762d12e6089ab74f20290a645694374b9ba7e"
   },
   {
     "full_name": "Шубина С.В.",
     "login": "Шубина",
     "password": "12345",
-    "roles": [
-      "issue"
-    ],
     "permissions": {},
     "id": "d0d28447-4d87-4b71-8687-2a062fced883",
-    "created_at": "2026-08-17T18:17:03.582464"
+    "created_at": "2026-08-17T18:17:03.582464",
+    "role_id": "role_issue_001",
+    "password_hash": "scrypt:32768:8:1$AUxAIhleAWqaspXr$d087fb9b6572206e562f5c500dae49010c15f361870bc4e3269d3076cf37b6de68242a1b259df90181a989003cb499833ac15b31f8c69c87dc2345c21d42f9d9"
   }
 ]

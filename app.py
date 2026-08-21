@@ -27,7 +27,7 @@ from app.models import (
     get_organizations, get_organization_by_id,
     get_mfcs, get_mfc_by_id,
     get_employees, get_employee_by_id, get_employee_by_login, check_permission, get_active_users,
-    get_documents, get_document_by_id, post_document, delete_document,
+    get_documents, get_document_by_id, post_document, delete_document, unpost_document,
     get_cards_report_as_of, get_period_report, get_period_report_detail, get_edo_report, get_summary_report, get_stock_report,
     CARD_STATUSES, DOCUMENT_TYPES, ACCESS_RESOURCES, ACCESS_LEVELS, log_action, now_iso
 )
@@ -718,6 +718,49 @@ def doc_post_route(doc_id):
     else:
         flash(message, "danger")
     return redirect(url_for("doc_edit", doc_id=doc_id))
+
+
+@app.route("/docs/unpost/<doc_id>", methods=["POST"])
+@login_required
+def doc_unpost_route(doc_id):
+    """Отмена проведения документа."""
+    doc = get_document_by_id(doc_id)
+    if is_issue_user() and (not doc or doc.get("doc_type") != "issue"):
+        flash("Доступ запрещен", "danger")
+        return redirect(url_for("docs_journal"))
+    
+    # Проверка прав доступа
+    user_id = session.get("user_id")
+    employee = get_employee_by_id(user_id)
+    if not employee:
+        flash("Пользователь не найден", "danger")
+        return redirect(url_for("docs_journal"))
+    
+    role = employee.get("role", "")
+    permissions = employee.get("permissions", {})
+    
+    # Проверяем право на отмену проведения для данного типа документа
+    doc_type = doc.get("doc_type", "")
+    resource_key = f"docs_{doc_type}"
+    
+    has_permission = False
+    if role == "admin":
+        has_permission = True
+    elif resource_key in permissions:
+        perm_level = permissions[resource_key]
+        if perm_level in ("unpost", "full"):
+            has_permission = True
+    
+    if not has_permission:
+        flash("Недостаточно прав для отмены проведения", "danger")
+        return redirect(url_for("docs_journal"))
+    
+    success, message = unpost_document(doc_id, session.get("user_id"))
+    if success:
+        flash(message, "success")
+    else:
+        flash(message, "danger")
+    return redirect(url_for("docs_journal"))
 
 
 @app.route("/docs/delete/<doc_id>", methods=["POST"])

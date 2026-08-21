@@ -94,6 +94,11 @@ def get_card_by_number(number):
     return find_one("cards", lambda c: c.get("card_number") == number)
 
 
+def get_card_by_id(card_id):
+    """Получить карту по ID."""
+    return find_one("cards", lambda c: c.get("id") == card_id)
+
+
 def create_or_update_card(card_data, user_id=None):
     existing = get_card_by_number(card_data.get("card_number"))
     if existing:

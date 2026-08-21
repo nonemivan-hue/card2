@@ -27,6 +27,35 @@ DOCUMENT_TYPES = {
     "return_mfc": "Возврат из МФЦ"
 }
 
+# Ресурсы для настройки доступа на русском языке
+ACCESS_RESOURCES = {
+    "cards": "Карты",
+    "card_types": "Виды карт",
+    "owners": "ФИО владельцев",
+    "applicants": "ФИО заявителей",
+    "organizations": "Организации",
+    "mfcs": "МФЦ",
+    "employees": "Сотрудники",
+    "documents_receipt": "Документ: Прием карт",
+    "documents_defect": "Документ: Брак",
+    "documents_print": "Документ: Печать карт",
+    "documents_issue": "Документ: Выдача карт",
+    "documents_transfer_mfc": "Документ: Передача в МФЦ",
+    "documents_transfer_region": "Документ: Передача в другой регион",
+    "documents_return_mfc": "Документ: Возврат из МФЦ",
+    "reports": "Отчеты"
+}
+
+# Уровни доступа
+ACCESS_LEVELS = {
+    "none": "Нет доступа",
+    "view": "Чтение",
+    "edit": "Редактирование",
+    "create": "Создание",
+    "unpost": "Отмена проведения",
+    "full": "Полный доступ"
+}
+
 
 # ============== HELPERS ==============
 def now_iso():
@@ -43,12 +72,19 @@ def log_action(user_id, action, details=""):
 
 
 # ============== CARD REFERENCE ==============
-def get_cards(filters=None, sort_by=None):
+def get_cards(filters=None, sort_by=None, search_owner=None):
     cards = load_all("cards")
     if filters:
         for key, value in filters.items():
             if value:
                 cards = [c for c in cards if str(c.get(key, "")).lower().find(str(value).lower()) >= 0]
+    
+    # Поиск по фамилии владельца
+    if search_owner:
+        owners = load_all("owners")
+        owner_ids = [o["id"] for o in owners if search_owner.lower() in o.get("full_name", "").lower()]
+        cards = [c for c in cards if c.get("owner_id") in owner_ids]
+    
     if sort_by:
         cards = sorted(cards, key=lambda x: x.get(sort_by, ""))
     return cards
@@ -170,11 +206,40 @@ def check_permission(employee, resource, level="view"):
         return True
     perms = employee.get("permissions", {})
     resource_perm = perms.get(resource, "")
+    
+    # Полный доступ дает все права
+    if resource_perm == "full":
+        return True
+    
+    # Проверка по уровням доступа
     if level == "view":
-        return resource_perm in ["view", "edit"]
+        return resource_perm in ["view", "edit", "create", "unpost", "full"]
     if level == "edit":
-        return resource_perm == "edit"
+        return resource_perm in ["edit", "create", "full"]
+    if level == "create":
+        return resource_perm in ["create", "full"]
+    if level == "unpost":
+        return resource_perm in ["unpost", "full"]
     return False
+
+
+def get_card_history(card_number):
+    """Получить историю изменений карты из журнала действий."""
+    logs = load_all("action_log")
+    history = []
+    for log in logs:
+        details = log.get("details", "")
+        # Ищем записи, связанные с данной картой
+        if card_number in details or f"card {card_number}" in details.lower():
+            history.append({
+                "timestamp": log.get("timestamp", ""),
+                "user_id": log.get("user_id", ""),
+                "action": log.get("action", ""),
+                "details": details
+            })
+    # Сортируем по времени (новые сверху)
+    history.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    return history
 
 
 # ============== DOCUMENTS ==============

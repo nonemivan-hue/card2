@@ -64,7 +64,7 @@ def admin_required(f):
             flash("Необходима авторизация", "warning")
             return redirect(url_for("login"))
         user = get_employee_by_id(session["user_id"])
-        if not user or user.get("role") != "admin":
+        if not user or "admin" not in user.get("roles", []):
             flash("Доступ запрещен", "danger")
             return redirect(url_for("index"))
         return f(*args, **kwargs)
@@ -92,7 +92,7 @@ def inject_globals():
         "card_statuses": CARD_STATUSES,
         "document_types": DOCUMENT_TYPES,
         "current_user": user,
-        "is_admin": user and user.get("role") == "admin",
+        "is_admin": user and "admin" in user.get("roles", []),
         "is_issue_user": is_issue_user(),
         "access_resources": ACCESS_RESOURCES,
         "access_levels": ACCESS_LEVELS
@@ -147,7 +147,7 @@ def change_password():
     target_id = request.args.get("user_id") or request.form.get("user_id")
     # Admin can change any password; regular users only their own
     if target_id and target_id != session["user_id"]:
-        if not user or user.get("role") != "admin":
+        if not user or "admin" not in user.get("roles", []):
             flash("Доступ запрещен", "danger")
             return redirect(url_for("index"))
         target_user = get_employee_by_id(target_id)
@@ -167,7 +167,7 @@ def change_password():
         from werkzeug.security import check_password_hash, generate_password_hash
         
         # Non-admin must provide correct old password
-        if user.get("role") != "admin":
+        if "admin" not in user.get("roles", []):
             if not check_password_hash(target_user.get("password_hash", ""), old_password):
                 flash("Неверный текущий пароль", "danger")
                 return redirect(url_for("change_password", user_id=target_id))
@@ -185,7 +185,7 @@ def change_password():
         flash("Пароль изменен", "success")
         return redirect(url_for("index"))
 
-    return render_template("change_password.html", target_user=target_user, is_admin=user.get("role") == "admin")
+    return render_template("change_password.html", target_user=target_user, is_admin="admin" in user.get("roles", []))
 
 
 # ============== REFERENCE: CARDS ==============
@@ -249,7 +249,7 @@ def ref_cards_delete(card_id):
 def ref_cards_edit(card_id):
     """Редактирование карты (только для admin)."""
     user = get_employee_by_id(session["user_id"])
-    if not user or user.get("role") != "admin":
+    if not user or "admin" not in user.get("roles", []):
         flash("Доступ запрещен. Требуется роль администратора.", "danger")
         return redirect(url_for("ref_cards"))
     
@@ -737,6 +737,7 @@ def doc_unpost_route(doc_id):
         return redirect(url_for("docs_journal"))
     
     role = employee.get("role", "")
+    roles = employee.get("roles", [])
     permissions = employee.get("permissions", {})
     
     # Проверяем право на отмену проведения для данного типа документа
@@ -744,7 +745,7 @@ def doc_unpost_route(doc_id):
     resource_key = f"docs_{doc_type}"
     
     has_permission = False
-    if role == "admin":
+    if "admin" in roles:
         has_permission = True
     elif resource_key in permissions:
         perm_level = permissions[resource_key]

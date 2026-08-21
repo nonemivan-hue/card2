@@ -199,11 +199,12 @@ def ref_cards():
 
     search_number = request.args.get("search_number", "")
     search_type = request.args.get("search_type", "")
+    search_owner = request.args.get("search_owner", "")
     sort_by = request.args.get("sort_by", "")
     filters = {}
     if search_number:
         filters["card_number"] = search_number
-    cards = get_cards(filters=filters, sort_by=sort_by if sort_by else None)
+    cards = get_cards(filters=filters, sort_by=sort_by if sort_by else None, search_owner=search_owner if search_owner else None)
     card_types = {ct["id"]: ct for ct in get_card_types()}
     owners = {o["id"]: o for o in get_owners()}
     applicants = {a["id"]: a for a in get_applicants()}
@@ -218,6 +219,7 @@ def ref_cards():
                            applicants=applicants,
                            search_number=search_number,
                            search_type=search_type,
+                           search_owner=search_owner,
                            sort_by=sort_by)
 
 
@@ -227,6 +229,64 @@ def ref_cards_delete(card_id):
     delete("cards", lambda x: x.get("id") == card_id)
     flash("Карта удалена", "success")
     return redirect(url_for("ref_cards"))
+
+
+@app.route("/refs/cards/edit/<card_id>", methods=["GET", "POST"])
+@login_required
+def ref_cards_edit(card_id):
+    """Редактирование карты (только для admin)."""
+    user = get_employee_by_id(session["user_id"])
+    if not user or "admin" not in user.get("roles", []):
+        flash("Доступ запрещен. Требуется роль администратора.", "danger")
+        return redirect(url_for("ref_cards"))
+    
+    card = get_card_by_id(card_id)
+    if not card:
+        flash("Карта не найдена", "danger")
+        return redirect(url_for("ref_cards"))
+    
+    if request.method == "POST":
+        card_data = {
+            "card_type_id": request.form.get("card_type_id", ""),
+            "status": request.form.get("status", ""),
+            "owner_id": request.form.get("owner_id", ""),
+            "applicant_id": request.form.get("applicant_id", "")
+        }
+        card_data["updated_at"] = now_iso()
+        update("cards", lambda c: c.get("id") == card_id, card_data)
+        
+        # Логируем изменение
+        log_action(user["id"], "EDIT_CARD", f"Edited card {card.get('card_number')}")
+        
+        flash("Карта обновлена", "success")
+        return redirect(url_for("ref_cards"))
+    
+    card_types = get_card_types()
+    all_owners = get_owners()
+    all_applicants = get_applicants()
+    return render_template("refs/cards_edit.html", 
+                           card=card, 
+                           card_types=card_types, 
+                           owners=all_owners, 
+                           applicants=all_applicants)
+
+
+@app.route("/refs/cards/history/<card_id>")
+@login_required
+def ref_cards_history(card_id):
+    """История изменений карты."""
+    card = get_card_by_id(card_id)
+    if not card:
+        flash("Карта не найдена", "danger")
+        return redirect(url_for("ref_cards"))
+    
+    history = get_card_history(card.get("card_number", ""))
+    employees = {e["id"]: e for e in get_employees()}
+    
+    return render_template("refs/cards_history.html", 
+                           card=card, 
+                           history=history, 
+                           employees=employees)
 
 
 # ============== REFERENCE: CARD TYPES ==============

@@ -1,4 +1,4 @@
-```gitignore
+```
 # Compiled and build artifacts
 *.pyc
 __pycache__/
@@ -23,11 +23,20 @@ node_modules/
 .idea/
 
 # Coverage reports
-.coverage
 coverage/
 htmlcov/
+.coverage
+
+# Distribution artifacts
+dist/
+build/
+target/
 
 # Python cache
 .mypy_cache/
 .pytest_cache/
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```

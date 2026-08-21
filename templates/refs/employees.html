@@ -22,9 +22,10 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">Роль</label>
-                <select name="role" class="form-select" size="1">
-                    <option value="user">Пользователь</option>
-                    <option value="admin">Администратор</option>
+                <select name="role_id" class="form-select" size="1">
+                    {% for r in roles %}
+                    <option value="{{ r.id }}">{{ r.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="col-md-2">
@@ -69,7 +70,14 @@
                 <tr>
                     <td>{{ item.full_name }}</td>
                     <td><code>{{ item.login }}</code></td>
-                    <td>{{ item.role if item.role else 'Пользователь' }}</td>
+                    <td>
+                        {% if item.role_id %}
+                            {% set emp_role = roles | selectattr('id', 'equalto', item.role_id) | first %}
+                            {{ emp_role.name if emp_role else 'Неизвестная роль' }}
+                        {% else %}
+                            Пользователь
+                        {% endif %}
+                    </td>
                     <td class="d-flex gap-1">
                         <a href="{{ url_for('ref_employees_edit', item_id=item.id) }}" class="btn btn-sm btn-outline-secondary" title="Редактировать и настроить права">
                             <i class="bi bi-pencil"></i>

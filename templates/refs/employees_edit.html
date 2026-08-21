@@ -24,9 +24,10 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Роль</label>
-                    <select name="role" class="form-select" size="1">
-                        <option value="user" {% if employee.role == 'user' %}selected{% endif %}>Пользователь</option>
-                        <option value="admin" {% if employee.role == 'admin' %}selected{% endif %}>Администратор</option>
+                    <select name="role_id" class="form-select" size="1">
+                        {% for r in roles %}
+                        <option value="{{ r.id }}" {% if employee.role_id == r.id %}selected{% endif %}>{{ r.name }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>

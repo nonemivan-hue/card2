@@ -3,6 +3,10 @@
     "id": "82672be1-cbea-4e8d-bb59-653f7a5eea8d",
     "organization_name": "ГКУ КК УСЗН в городе-курорте Геленджике",
     "created_at": "2026-08-11T23:30:06.806293",
-    "updated_at": "2026-08-11T23:32:56.327951"
+    "updated_at": "2026-08-11T23:32:56.327951",
+    "auto_backup_enabled": false,
+    "backup_schedule": "daily",
+    "backup_time": "02:00",
+    "backup_retention_days": 30
   }
 ]

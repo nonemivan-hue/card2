@@ -129,5 +129,13 @@
     "created_at": "2026-08-17T18:17:03.582464",
     "role_id": "role_issue_001",
     "password_hash": "scrypt:32768:8:1$AUxAIhleAWqaspXr$d087fb9b6572206e562f5c500dae49010c15f361870bc4e3269d3076cf37b6de68242a1b259df90181a989003cb499833ac15b31f8c69c87dc2345c21d42f9d9"
+  },
+  {
+    "id": "f4e6e2c7-542e-43d1-a9bb-a5ace62b9067",
+    "full_name": "Администратор системы",
+    "login": "admin",
+    "password": "admin",
+    "role_id": "role_admin_001",
+    "created_at": "2026-08-21T13:28:31.098903"
   }
 ]

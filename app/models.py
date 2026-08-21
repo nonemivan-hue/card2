@@ -437,6 +437,71 @@ def post_document(doc_id, user_id=None):
     return True, "Документ проведен успешно"
 
 
+def unpost_document(doc_id, user_id=None):
+    """Отмена проведения документа - возврат статусов карт к предыдущим значениям."""
+    doc = get_document_by_id(doc_id)
+    if not doc:
+        return False, "Документ не найден"
+    if doc.get("status") != "posted":
+        return False, "Документ не проведен"
+
+    doc_type = doc.get("doc_type")
+    lines = doc.get("lines", [])
+
+    for idx, line in enumerate(lines, 1):
+        card_number = line.get("card_number")
+        card = get_card_by_number(card_number)
+
+        if not card:
+            continue
+
+        # Возвращаем статус карты к состоянию до проведения
+        if doc_type == "receipt":
+            # Прием карт -> удаляем карту или возвращаем пустой статус
+            update("cards", lambda c: c.get("id") == card["id"],
+                   {"status": "", "owner_id": "", "applicant_id": "", "updated_at": now_iso()})
+
+        elif doc_type == "defect":
+            # Брак -> возвращаем ready_to_print или ready_to_issue
+            # Нужно определить предыдущий статус (упрощенно ставим ready_to_print)
+            update("cards", lambda c: c.get("id") == card["id"],
+                   {"status": "ready_to_print", "updated_at": now_iso()})
+
+        elif doc_type == "print":
+            # Печать -> возвращаем ready_to_print
+            update("cards", lambda c: c.get("id") == card["id"],
+                   {"status": "ready_to_print", "updated_at": now_iso()})
+
+        elif doc_type == "issue":
+            # Выдача -> возвращаем ready_to_issue
+            update("cards", lambda c: c.get("id") == card["id"],
+                   {"status": "ready_to_issue", "updated_at": now_iso()})
+
+        elif doc_type == "transfer_mfc":
+            # Передача в МФЦ -> возвращаем ready_to_issue
+            update("cards", lambda c: c.get("id") == card["id"],
+                   {"status": "ready_to_issue", "updated_at": now_iso()})
+
+        elif doc_type == "transfer_region":
+            # Передача в регион -> возвращаем ready_to_print
+            update("cards", lambda c: c.get("id") == card["id"],
+                   {"status": "ready_to_print", "updated_at": now_iso()})
+
+        elif doc_type == "return_mfc":
+            # Возврат из МФЦ -> возвращаем issued
+            update("cards", lambda c: c.get("id") == card["id"],
+                   {"status": "issued", "updated_at": now_iso()})
+
+    # Mark document as draft
+    update("documents", lambda d: d.get("id") == doc_id,
+           {"status": "draft", "posted_at": None, "posted_by": None, "updated_at": now_iso()})
+
+    if user_id:
+        log_action(user_id, "UNPOST_DOC", f"Unposted document {doc.get('doc_number')} ({doc_type})")
+
+    return True, "Документ успешно отменен"
+
+
 # ============== REPORTS ==============
 def get_stock_report():
     """Report: stock of cards by type (ready_to_print and ready_to_issue)."""

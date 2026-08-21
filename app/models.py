@@ -216,7 +216,8 @@ def update_employee(emp_id, updates, user_id=None):
 def check_permission(employee, resource, level="view"):
     """Check if employee has permission for resource at given level."""
     # Admin имеет полный доступ ко всем ресурсам
-    if employee.get("role") == "admin":
+    roles = employee.get("roles", [])
+    if "admin" in roles:
         return True
     
     perms = employee.get("permissions", {})

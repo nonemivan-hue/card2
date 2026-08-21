@@ -64,7 +64,7 @@ def admin_required(f):
             flash("Необходима авторизация", "warning")
             return redirect(url_for("login"))
         user = get_employee_by_id(session["user_id"])
-        if not user or "admin" not in user.get("roles", []):
+        if not user or user.get("role") != "admin":
             flash("Доступ запрещен", "danger")
             return redirect(url_for("index"))
         return f(*args, **kwargs)
@@ -78,8 +78,8 @@ def is_issue_user():
     user = get_employee_by_id(session["user_id"])
     if not user:
         return False
-    roles = user.get("roles", [])
-    return "issue" in roles and "admin" not in roles and "user" not in roles
+    # Старая логика с roles удалена, теперь проверяем только роль
+    return False
 
 
 # ============== CONTEXT PROCESSOR ==============
@@ -92,7 +92,7 @@ def inject_globals():
         "card_statuses": CARD_STATUSES,
         "document_types": DOCUMENT_TYPES,
         "current_user": user,
-        "is_admin": user and "admin" in user.get("roles", []),
+        "is_admin": user and user.get("role") == "admin",
         "is_issue_user": is_issue_user(),
         "access_resources": ACCESS_RESOURCES,
         "access_levels": ACCESS_LEVELS
@@ -147,7 +147,7 @@ def change_password():
     target_id = request.args.get("user_id") or request.form.get("user_id")
     # Admin can change any password; regular users only their own
     if target_id and target_id != session["user_id"]:
-        if not user or "admin" not in user.get("roles", []):
+        if not user or user.get("role") != "admin":
             flash("Доступ запрещен", "danger")
             return redirect(url_for("index"))
         target_user = get_employee_by_id(target_id)
@@ -164,9 +164,11 @@ def change_password():
         new_password = request.form.get("new_password", "").strip()
         confirm_password = request.form.get("confirm_password", "").strip()
 
+        from werkzeug.security import check_password_hash, generate_password_hash
+        
         # Non-admin must provide correct old password
-        if "admin" not in user.get("roles", []):
-            if target_user.get("password") != old_password:
+        if user.get("role") != "admin":
+            if not check_password_hash(target_user.get("password_hash", ""), old_password):
                 flash("Неверный текущий пароль", "danger")
                 return redirect(url_for("change_password", user_id=target_id))
 
@@ -178,12 +180,12 @@ def change_password():
             flash("Пароли не совпадают", "danger")
             return redirect(url_for("change_password", user_id=target_id))
 
-        update("employees", lambda e: e.get("id") == target_id, {"password": new_password})
+        update("employees", lambda e: e.get("id") == target_id, {"password_hash": generate_password_hash(new_password)})
         log_action(session["user_id"], "CHANGE_PASSWORD", f"Changed password for {target_user.get('login', '')}")
         flash("Пароль изменен", "success")
         return redirect(url_for("index"))
 
-    return render_template("change_password.html", target_user=target_user, is_admin="admin" in user.get("roles", []))
+    return render_template("change_password.html", target_user=target_user, is_admin=user.get("role") == "admin")
 
 
 # ============== REFERENCE: CARDS ==============
@@ -247,7 +249,7 @@ def ref_cards_delete(card_id):
 def ref_cards_edit(card_id):
     """Редактирование карты (только для admin)."""
     user = get_employee_by_id(session["user_id"])
-    if not user or "admin" not in user.get("roles", []):
+    if not user or user.get("role") != "admin":
         flash("Доступ запрещен. Требуется роль администратора.", "danger")
         return redirect(url_for("ref_cards"))
     
@@ -451,12 +453,14 @@ def api_mfcs():
 @admin_required
 def ref_employees():
     if request.method == "POST":
-        roles = request.form.getlist("roles")
+        role = request.form.get("role", "user")  # Изменено с roles на role
+        password = request.form.get("password", "")
+        from werkzeug.security import generate_password_hash
         insert("employees", {
             "full_name": request.form.get("full_name", ""),
             "login": request.form.get("login", ""),
-            "password": request.form.get("password", ""),
-            "roles": roles if roles else ["user"],
+            "password_hash": generate_password_hash(password) if password else "",
+            "role": role,
             "permissions": {}
         })
         flash("Сотрудник добавлен", "success")
@@ -488,9 +492,9 @@ def ref_employees_edit(item_id):
         full_name = request.form.get("full_name", "")
         login = request.form.get("login", "")
         password = request.form.get("password", "")
-        roles = request.form.getlist("roles")
+        role = request.form.get("role", "user")  # Изменено с roles на role
         
-        # Собираем права доступа
+        # Собираем права доступа к документам
         permissions = {}
         for resource in ACCESS_RESOURCES.keys():
             level = request.form.get(f"perm_{resource}", "none")
@@ -499,14 +503,14 @@ def ref_employees_edit(item_id):
         updates = {
             "full_name": full_name,
             "login": login,
-            "roles": roles if roles else ["user"]
+            "role": role  # Изменено с roles на role
         }
         if password:
-            updates["password"] = password
+            from werkzeug.security import generate_password_hash
+            updates["password_hash"] = generate_password_hash(password)
         updates["permissions"] = permissions
         
-        update("employees", lambda e: e.get("id") == item_id, updates)
-        log_action(session["user_id"], "EDIT_EMPLOYEE", f"Edited employee {employee.get('login')}")
+        update_employee(item_id, updates, session.get("user_id"))
         flash("Сотрудник обновлен", "success")
         return redirect(url_for("ref_employees"))
     
@@ -557,11 +561,12 @@ def api_employees():
     if request.method == "GET":
         return jsonify(get_employees())
     data = request.get_json() or {}
+    from werkzeug.security import generate_password_hash
     item = insert("employees", {
         "full_name": data.get("full_name", ""),
         "login": data.get("login", ""),
-        "password": data.get("password", ""),
-        "roles": data.get("roles", []),
+        "password_hash": generate_password_hash(data.get("password", "")) if data.get("password") else "",
+        "role": data.get("role", "user"),
         "permissions": data.get("permissions", {})
     })
     return jsonify(item), 201
@@ -1500,12 +1505,12 @@ def _parse_reference_excel(file_storage, ref_name):
         elif ref_name == "applicants":
             items.append({"full_name": str(row[0]).strip()})
         elif ref_name == "employees":
-            roles = [r.strip() for r in str(row[3]).split(",")] if len(row) > 3 and row[3] else ["user"]
+            from werkzeug.security import generate_password_hash
             items.append({
                 "full_name": str(row[0]).strip(),
                 "login": str(row[1]).strip() if len(row) > 1 else "",
-                "password": str(row[2]).strip() if len(row) > 2 else "",
-                "roles": roles
+                "password_hash": generate_password_hash(str(row[2]).strip()) if len(row) > 2 and row[2] else "",
+                "role": str(row[3]).strip() if len(row) > 3 and row[3] else "user"
             })
     return items, None
 
@@ -1558,11 +1563,12 @@ def ref_import_excel(ref_name):
                 count += 1
         elif ref_name == "employees":
             if item.get("full_name") and item.get("login"):
+                from werkzeug.security import generate_password_hash
                 insert("employees", {
                     "full_name": item["full_name"],
                     "login": item["login"],
-                    "password": item.get("password", ""),
-                    "roles": item.get("roles", ["user"]),
+                    "password_hash": generate_password_hash(item.get("password", "")) if item.get("password") else "",
+                    "role": item.get("role", "user"),
                     "permissions": {}
                 })
                 count += 1
@@ -1615,6 +1621,10 @@ def ref_export_excel(ref_name):
         ws.append(["Код", "Наименование"])
         for m in get_mfcs():
             ws.append([m.get("code", ""), m.get("name", "")])
+    elif ref_name == "employees":
+        ws.append(["ФИО", "Логин", "Пароль", "Роль"])
+        for e in get_employees():
+            ws.append([e.get("full_name", ""), e.get("login", ""), "", e.get("role", "user")])
     else:
         flash("Неизвестный справочник", "danger")
         return redirect(url_for("index"))

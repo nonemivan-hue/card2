@@ -17,6 +17,10 @@
                 <input type="text" name="print_name" class="form-control">
             </div>
             <div class="col-md-4">
+                <label class="form-label">Наименование для отчета</label>
+                <input type="text" name="report_name" class="form-control">
+            </div>
+            <div class="col-md-12">
                 <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Добавить</button>
                 <a href="{{ url_for('download_template', ref_name='card_types') }}" class="btn btn-outline-success btn-sm">
                     <i class="bi bi-download"></i> Шаблон Excel
@@ -47,20 +51,24 @@
     <div class="card-header bg-white">Список видов карт</div>
     <div class="card-body p-0">
         <table class="table table-hover mb-0">
-            <thead><tr><th>Вид карты</th><th>Наименование для печати</th><th style="width:60px"></th></tr></thead>
+            <thead><tr><th>Вид карты</th><th>Наименование для печати</th><th>Наименование для отчета</th><th style="width:120px"></th></tr></thead>
             <tbody>
                 {% for item in items %}
                 <tr>
                     <td>{{ item.name }}</td>
                     <td>{{ item.print_name }}</td>
-                    <td>
+                    <td>{{ item.report_name if item.report_name else '—' }}</td>
+                    <td class="d-flex gap-1">
+                        <a href="{{ url_for('ref_card_types_edit', item_id=item.id) }}" class="btn btn-sm btn-outline-secondary" title="Редактировать">
+                            <i class="bi bi-pencil"></i>
+                        </a>
                         <form method="POST" action="{{ url_for('ref_card_types_delete', item_id=item.id) }}" onsubmit="return confirm('Удалить?');">
                             <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
                         </form>
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="3" class="text-center text-muted py-4">Нет данных</td></tr>
+                <tr><td colspan="4" class="text-center text-muted py-4">Нет данных</td></tr>
                 {% endfor %}
             </tbody>
         </table>

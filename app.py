@@ -21,12 +21,12 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 from app.storage import load_all, save_all, insert, update, delete, get_next_number
 from app.models import (
     get_cards, get_card_by_number, create_or_update_card, get_card_by_id, get_card_history,
-    get_card_types, get_card_type_by_id, get_card_type_by_name,
+    get_card_types, get_card_type_by_id, get_card_type_by_name, update_card_type,
     get_owners, get_owner_by_id, create_owner_if_not_exists,
     get_applicants, get_applicant_by_id, create_applicant_if_not_exists,
     get_organizations, get_organization_by_id,
-    get_mfcs, get_mfc_by_id,
-    get_employees, get_employee_by_id, get_employee_by_login, check_permission, get_active_users,
+    get_mfcs, get_mfc_by_id, update_mfc,
+    get_employees, get_employee_by_id, get_employee_by_login, check_permission, get_active_users, update_employee,
     get_documents, get_document_by_id, post_document, delete_document, unpost_document,
     get_cards_report_as_of, get_period_report, get_period_report_detail, get_edo_report, get_summary_report, get_stock_report,
     CARD_STATUSES, DOCUMENT_TYPES, ACCESS_RESOURCES, ACCESS_LEVELS, log_action, now_iso
@@ -311,7 +311,8 @@ def ref_card_types():
     if request.method == "POST" and "name" in request.form:
         insert("card_types", {
             "name": request.form.get("name", ""),
-            "print_name": request.form.get("print_name", "")
+            "print_name": request.form.get("print_name", ""),
+            "report_name": request.form.get("report_name", "")
         })
         flash("Вид карты добавлен", "success")
         return redirect(url_for("ref_card_types"))
@@ -327,6 +328,33 @@ def ref_card_types_delete(item_id):
     return redirect(url_for("ref_card_types"))
 
 
+@app.route("/refs/card_types/edit/<item_id>", methods=["GET", "POST"])
+@login_required
+def ref_card_types_edit(item_id):
+    """Редактирование вида карты."""
+    user = get_employee_by_id(session["user_id"])
+    if not user or "admin" not in user.get("roles", []):
+        flash("Доступ запрещен. Требуется роль администратора.", "danger")
+        return redirect(url_for("ref_card_types"))
+    
+    card_type = get_card_type_by_id(item_id)
+    if not card_type:
+        flash("Вид карты не найден", "danger")
+        return redirect(url_for("ref_card_types"))
+    
+    if request.method == "POST":
+        updates = {
+            "name": request.form.get("name", ""),
+            "print_name": request.form.get("print_name", ""),
+            "report_name": request.form.get("report_name", "")
+        }
+        update_card_type(item_id, updates, user["id"])
+        flash("Вид карты обновлен", "success")
+        return redirect(url_for("ref_card_types"))
+    
+    return render_template("refs/card_types_edit.html", card_type=card_type)
+
+
 @app.route("/api/card_types", methods=["GET", "POST"])
 @login_required
 def api_card_types():
@@ -335,7 +363,8 @@ def api_card_types():
     data = request.get_json() or {}
     item = insert("card_types", {
         "name": data.get("name", ""),
-        "print_name": data.get("print_name", "")
+        "print_name": data.get("print_name", ""),
+        "report_name": data.get("report_name", "")
     })
     return jsonify(item), 201
 
@@ -432,6 +461,32 @@ def ref_mfcs_delete(item_id):
     delete("mfcs", lambda x: x.get("id") == item_id)
     flash("МФЦ удален", "success")
     return redirect(url_for("ref_mfcs"))
+
+
+@app.route("/refs/mfcs/edit/<item_id>", methods=["GET", "POST"])
+@login_required
+def ref_mfcs_edit(item_id):
+    """Редактирование МФЦ."""
+    user = get_employee_by_id(session["user_id"])
+    if not user or "admin" not in user.get("roles", []):
+        flash("Доступ запрещен. Требуется роль администратора.", "danger")
+        return redirect(url_for("ref_mfcs"))
+    
+    mfc = get_mfc_by_id(item_id)
+    if not mfc:
+        flash("МФЦ не найден", "danger")
+        return redirect(url_for("ref_mfcs"))
+    
+    if request.method == "POST":
+        updates = {
+            "code": request.form.get("code", ""),
+            "name": request.form.get("name", "")
+        }
+        update_mfc(item_id, updates, user["id"])
+        flash("МФЦ обновлен", "success")
+        return redirect(url_for("ref_mfcs"))
+    
+    return render_template("refs/mfcs_edit.html", mfc=mfc)
 
 
 @app.route("/api/mfcs", methods=["GET", "POST"])

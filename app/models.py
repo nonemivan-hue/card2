@@ -512,7 +512,7 @@ def get_stock_report():
     result = {}
     for ct in card_types:
         result[ct["id"]] = {
-            "card_type_name": ct.get("name", "Не указан"),
+            "card_type_name": ct.get("report_name", ct.get("name", "Не указан")),
             "ready_to_print": 0,
             "ready_to_issue": 0
         }
@@ -547,7 +547,7 @@ def get_cards_report_as_of(date_str):
     for (ct_id, status), count in result.items():
         ct = get_card_type_by_id(ct_id)
         report.append({
-            "card_type_name": ct.get("name", "Не указан") if ct else "Не указан",
+            "card_type_name": ct.get("report_name", ct.get("name", "Не указан")) if ct else "Не указан",
             "status": CARD_STATUSES.get(status, status),
             "status_code": status,
             "count": count
@@ -595,7 +595,7 @@ def get_period_report(start_date, end_date):
     for ct_id in sorted(all_ct_ids):
         ct = get_card_type_by_id(ct_id)
         report.append({
-            "card_type_name": ct.get("name", "Не указан") if ct else "Не указан",
+            "card_type_name": ct.get("report_name", ct.get("name", "Не указан")) if ct else "Не указан",
             "print_count": print_counts.get(ct_id, 0),
             "issue_count": issue_counts.get(ct_id, 0)
         })
@@ -705,7 +705,7 @@ def get_summary_report(start_date, end_date):
     for ct_id, numbers in result.items():
         ct = get_card_type_by_id(ct_id)
         report.append({
-            "card_type_name": ct.get("name", "Не указан") if ct else "Не указан",
+            "card_type_name": ct.get("report_name", ct.get("name", "Не указан")) if ct else "Не указан",
             "print_name": ct.get("print_name", ct.get("name", "")) if ct else "",
             "numbers": sorted(numbers)
         })

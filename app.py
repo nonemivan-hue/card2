@@ -311,7 +311,8 @@ def ref_card_types():
     if request.method == "POST" and "name" in request.form:
         insert("card_types", {
             "name": request.form.get("name", ""),
-            "print_name": request.form.get("print_name", "")
+            "print_name": request.form.get("print_name", ""),
+            "report_name": request.form.get("report_name", "")
         })
         flash("Вид карты добавлен", "success")
         return redirect(url_for("ref_card_types"))
@@ -335,7 +336,8 @@ def api_card_types():
     data = request.get_json() or {}
     item = insert("card_types", {
         "name": data.get("name", ""),
-        "print_name": data.get("print_name", "")
+        "print_name": data.get("print_name", ""),
+        "report_name": data.get("report_name", "")
     })
     return jsonify(item), 201
 

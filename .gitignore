@@ -1,57 +1,41 @@
-```python
-# Compiled and build artifacts
+```
+# Compiled Python files
 *.pyc
 __pycache__/
-*.o
-*.obj
-*.so
-*.a
-*.dll
-*.exe
-*.out
 
 # Dependencies
 .venv/
 venv/
-.env
-.env.local
-.env.*
+node_modules/
 
-# Logs and temp files
+# Logs and temporary files
 *.log
 *.tmp
-*.swp
-*.swo
 
-# Coverage reports
-.coverage
-coverage/
-htmlcov/
+# Environment files
+.env
+.env.local
+*.env.*
 
-# Editors
+# Editor/IDE files
 .vscode/
 .idea/
 
-# Python specific
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.egg-info/
-.eggs/
+# Build/dist directories
+build/
+dist/
+target/
+
+# Coverage reports
+coverage/
+htmlcov/
+*.coverage
+
+# Python cache
 .mypy_cache/
 .pytest_cache/
-.tox/
 
 # System files
 .DS_Store
 Thumbs.db
-```
-
-Wait, I need to reconsider. The modified files are only `app.py` and `app/models.py`, which are source code files. Let me check if there are any build artifacts or dependency-related files in the changes...
-
-Looking at the input again, there are no added or deleted files, and only source code files were modified. According to rule #6, if the changes contain only source or config files and no build artifacts, dependencies, or temp files, I should output an empty .gitignore.
-
-```python
-
 ```

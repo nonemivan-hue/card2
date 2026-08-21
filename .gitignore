@@ -1,1 +1,65 @@
-Nothing needs to be added to the .gitignore file since only a template file (templates/refs/cards.html) was modified and no build artifacts, dependencies, or temporary files were included in the changes.
+```
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+
+# Dependencies
+.venv/
+venv/
+node_modules/
+*.egg-info/
+dist/
+build/
+*.so
+*.dylib
+*.dll
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Testing and coverage
+.coverage
+coverage/
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Distribution / packaging
+*.tar.gz
+*.whl
+*.zip
+
+# Python specific
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.egg-info/
+.installed.cfg
+*.egg
+
+# Web artifacts
+static/dist/
+static/build/
+public/dist/
+public/build/
+```

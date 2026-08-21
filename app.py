@@ -26,10 +26,10 @@ from app.models import (
     get_applicants, get_applicant_by_id, create_applicant_if_not_exists,
     get_organizations, get_organization_by_id,
     get_mfcs, get_mfc_by_id,
-    get_employees, get_employee_by_id, get_employee_by_login, check_permission,
+    get_employees, get_employee_by_id, get_employee_by_login, check_permission, get_active_users,
     get_documents, get_document_by_id, post_document, delete_document,
     get_cards_report_as_of, get_period_report, get_period_report_detail, get_edo_report, get_summary_report, get_stock_report,
-    CARD_STATUSES, DOCUMENT_TYPES, log_action, now_iso
+    CARD_STATUSES, DOCUMENT_TYPES, ACCESS_RESOURCES, ACCESS_LEVELS, log_action, now_iso
 )
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -93,7 +93,9 @@ def inject_globals():
         "document_types": DOCUMENT_TYPES,
         "current_user": user,
         "is_admin": user and "admin" in user.get("roles", []),
-        "is_issue_user": is_issue_user()
+        "is_issue_user": is_issue_user(),
+        "access_resources": ACCESS_RESOURCES,
+        "access_levels": ACCESS_LEVELS
     }
 
 
@@ -101,7 +103,16 @@ def inject_globals():
 @app.route("/")
 @login_required
 def index():
-    return render_template("index.html")
+    active_users = get_active_users()
+    return render_template("index.html", active_users=active_users)
+
+
+@app.route("/statistics")
+@login_required
+def statistics():
+    """Окно статистики активных пользователей."""
+    active_users = get_active_users()
+    return render_template("statistics.html", active_users=active_users)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -449,7 +460,7 @@ def ref_employees():
         flash("Сотрудник добавлен", "success")
         return redirect(url_for("ref_employees"))
     items = get_employees()
-    return render_template("refs/employees.html", items=items)
+    return render_template("refs/employees.html", items=items, access_resources=ACCESS_RESOURCES, access_levels=ACCESS_LEVELS)
 
 
 @app.route("/refs/employees/delete/<item_id>", methods=["POST"])
@@ -459,6 +470,82 @@ def ref_employees_delete(item_id):
     delete("employees", lambda x: x.get("id") == item_id)
     flash("Сотрудник удален", "success")
     return redirect(url_for("ref_employees"))
+
+
+@app.route("/refs/employees/edit/<item_id>", methods=["GET", "POST"])
+@login_required
+@admin_required
+def ref_employees_edit(item_id):
+    """Редактирование сотрудника и настройка прав доступа."""
+    employee = get_employee_by_id(item_id)
+    if not employee:
+        flash("Сотрудник не найден", "danger")
+        return redirect(url_for("ref_employees"))
+    
+    if request.method == "POST":
+        full_name = request.form.get("full_name", "")
+        login = request.form.get("login", "")
+        password = request.form.get("password", "")
+        roles = request.form.getlist("roles")
+        
+        # Собираем права доступа
+        permissions = {}
+        for resource in ACCESS_RESOURCES.keys():
+            level = request.form.get(f"perm_{resource}", "none")
+            permissions[resource] = level
+        
+        updates = {
+            "full_name": full_name,
+            "login": login,
+            "roles": roles if roles else ["user"]
+        }
+        if password:
+            updates["password"] = password
+        updates["permissions"] = permissions
+        
+        update("employees", lambda e: e.get("id") == item_id, updates)
+        log_action(session["user_id"], "EDIT_EMPLOYEE", f"Edited employee {employee.get('login')}")
+        flash("Сотрудник обновлен", "success")
+        return redirect(url_for("ref_employees"))
+    
+    return render_template("refs/employees_edit.html", 
+                           employee=employee, 
+                           access_resources=ACCESS_RESOURCES, 
+                           access_levels=ACCESS_LEVELS)
+
+
+# Окно настройки прав доступа (альтернативный маршрут)
+@app.route("/settings/access", methods=["GET", "POST"])
+@login_required
+@admin_required
+def settings_access():
+    """Настройка прав доступа для сотрудников."""
+    selected_emp = None
+    if request.method == "POST":
+        emp_id = request.form.get("employee_id")
+        if emp_id:
+            # Проверяем, есть ли уже права в форме (значит нажали сохранить)
+            if any(key.startswith("perm_") for key in request.form.keys()):
+                # Собираем права доступа
+                permissions = {}
+                for resource in ACCESS_RESOURCES.keys():
+                    level = request.form.get(f"perm_{resource}", "none")
+                    permissions[resource] = level
+                
+                update("employees", lambda e: e.get("id") == emp_id, {"permissions": permissions})
+                log_action(session["user_id"], "UPDATE_PERMISSIONS", f"Updated permissions for employee {emp_id}")
+                flash("Права доступа обновлены", "success")
+                return redirect(url_for("settings_access"))
+            else:
+                # Просто выбрали сотрудника
+                selected_emp = get_employee_by_id(emp_id)
+    
+    employees = get_employees()
+    return render_template("settings/access.html", 
+                           employees=employees, 
+                           selected_emp=selected_emp,
+                           access_resources=ACCESS_RESOURCES, 
+                           access_levels=ACCESS_LEVELS)
 
 
 @app.route("/api/employees", methods=["GET", "POST"])

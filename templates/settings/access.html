@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Настройка прав доступа - Учет транспортных карт{% endblock %}
+{% block page_title %}Настройка прав доступа{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-header bg-white">
+        <h5 class="m-0"><i class="bi bi-shield-lock"></i> Настройка прав доступа для сотрудников</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('settings_access') }}">
+            <div class="mb-3">
+                <label class="form-label">Выберите сотрудника:</label>
+                <select name="employee_id" class="form-select" required onchange="this.form.submit()">
+                    <option value="">-- Выберите --</option>
+                    {% for emp in employees %}
+                    <option value="{{ emp.id }}" {% if selected_emp and selected_emp.id == emp.id %}selected{% endif %}>
+                        {{ emp.full_name }} ({{ emp.login }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+
+        {% if selected_emp %}
+        <hr>
+        <form method="POST" action="{{ url_for('settings_access') }}">
+            <input type="hidden" name="employee_id" value="{{ selected_emp.id }}">
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40%;">Ресурс</th>
+                            <th style="width: 60%;">Уровень доступа</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resource_key, resource_name in access_resources.items() %}
+                        <tr>
+                            <td>
+                                <strong>{{ resource_name }}</strong>
+                                <small class="text-muted d-block">{{ resource_key }}</small>
+                            </td>
+                            <td>
+                                <select name="perm_{{ resource_key }}" class="form-select">
+                                    {% for level_key, level_name in access_levels.items() %}
+                                    <option value="{{ level_key }}" 
+                                            {% if selected_emp.permissions.get(resource_key) == level_key %}selected{% endif %}>
+                                        {{ level_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить права доступа
+                </button>
+                <a href="{{ url_for('ref_employees') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Назад к сотрудникам
+                </a>
+            </div>
+        </form>
+        {% else %}
+        <div class="alert alert-info mt-3">
+            <i class="bi bi-info-circle"></i> Выберите сотрудника из списка выше для настройки прав доступа.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

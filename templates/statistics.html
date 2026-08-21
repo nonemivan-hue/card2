@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Статистика - Учет транспортных карт{% endblock %}
+{% block page_title %}Статистика активных пользователей{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="m-0"><i class="bi bi-people"></i> Сотрудники в системе (за последний час)</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if active_users %}
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>ФИО</th>
+                    <th>Логин</th>
+                    <th>Последнее действие</th>
+                    <th>Время</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in active_users %}
+                <tr>
+                    <td>{{ user.full_name }}</td>
+                    <td><code>{{ user.login }}</code></td>
+                    <td>{{ user.last_action or '-' }}</td>
+                    <td>
+                        {% if user.last_timestamp %}
+                            {{ user.last_timestamp[11:19] }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-person-slash display-4"></i>
+            <p class="mt-3">Нет активных пользователей за последний час</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-3">
+    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> На главную
+    </a>
+    <button onclick="location.reload()" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-clockwise"></i> Обновить
+    </button>
+</div>
+{% endblock %}

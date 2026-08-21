@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Редактирование вида карты - Учет транспортных карт{% endblock %}
+{% block page_title %}Редактирование вида карты{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-header bg-white">
+        <h5 class="m-0"><i class="bi bi-card-text"></i> {{ card_type.name }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Вид карты</label>
+                    <input type="text" name="name" class="form-control" value="{{ card_type.name }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Наименование для печати</label>
+                    <input type="text" name="print_name" class="form-control" value="{{ card_type.print_name if card_type.print_name else '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Наименование для отчета</label>
+                    <input type="text" name="report_name" class="form-control" value="{{ card_type.report_name if card_type.report_name else '' }}">
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить изменения
+                </button>
+                <a href="{{ url_for('ref_card_types') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

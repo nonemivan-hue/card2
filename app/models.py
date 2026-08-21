@@ -128,6 +128,14 @@ def get_card_type_by_name(name):
     return find_one("card_types", lambda c: c.get("name") == name)
 
 
+def update_card_type(ct_id, updates, user_id=None):
+    """Обновить данные вида карты."""
+    result = update("card_types", lambda c: c.get("id") == ct_id, updates)
+    if user_id:
+        log_action(user_id, "UPDATE_CARD_TYPE", f"Updated card type {ct_id}")
+    return result
+
+
 # ============== OWNERS ==============
 def get_owners():
     return load_all("owners")
@@ -190,6 +198,14 @@ def get_mfcs():
 
 def get_mfc_by_id(mfc_id):
     return find_one("mfcs", lambda m: m.get("id") == mfc_id)
+
+
+def update_mfc(mfc_id, updates, user_id=None):
+    """Обновить данные МФЦ."""
+    result = update("mfcs", lambda m: m.get("id") == mfc_id, updates)
+    if user_id:
+        log_action(user_id, "UPDATE_MFC", f"Updated MFC {mfc_id}")
+    return result
 
 
 # ============== EMPLOYEES ==============

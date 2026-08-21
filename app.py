@@ -20,7 +20,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 from app.storage import load_all, save_all, insert, update, delete, get_next_number
 from app.models import (
-    get_cards, get_card_by_number, create_or_update_card,
+    get_cards, get_card_by_number, create_or_update_card, get_card_by_id, get_card_history,
     get_card_types, get_card_type_by_id, get_card_type_by_name,
     get_owners, get_owner_by_id, create_owner_if_not_exists,
     get_applicants, get_applicant_by_id, create_applicant_if_not_exists,

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}История изменений карты{% endblock %}
+{% block page_title %}История изменений карты{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-header bg-white">
+        <strong>Карта: {{ card.card_number }}</strong>
+    </div>
+    <div class="card-body">
+        <p><strong>Вид карты:</strong> {{ card_types.get(card.card_type_id, {}).name if card.card_type_id else 'Не указан' }}</p>
+        <p><strong>Статус:</strong> {{ card_statuses.get(card.status, card.status) if card.status else 'Не указан' }}</p>
+        <p><strong>ФИО владельца:</strong> {{ owners.get(card.owner_id, {}).full_name if card.owner_id else '' }}</p>
+        <p><strong>ФИО заявителя:</strong> {{ applicants.get(card.applicant_id, {}).full_name if card.applicant_id else '' }}</p>
+        <a href="{{ url_for('ref_cards') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Назад к справочнику</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white">
+        <strong>История изменений</strong>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Дата и время</th>
+                        <th>Пользователь</th>
+                        <th>Действие</th>
+                        <th>Документ/Описание</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in history %}
+                    <tr>
+                        <td>{{ entry.timestamp[:19].replace('T', ' ') if entry.timestamp else '' }}</td>
+                        <td>{{ employees.get(entry.user_id, {}).full_name if entry.user_id else '' }}</td>
+                        <td>{{ entry.action }}</td>
+                        <td>{{ entry.details }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">Нет записей об изменениях</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

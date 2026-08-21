@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Редактирование сотрудника - Учет транспортных карт{% endblock %}
+{% block page_title %}Редактирование сотрудника{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-header bg-white">
+        <h5 class="m-0"><i class="bi bi-person-gear"></i> {{ employee.full_name }}</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">ФИО</label>
+                    <input type="text" name="full_name" class="form-control" value="{{ employee.full_name }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Логин</label>
+                    <input type="text" name="login" class="form-control" value="{{ employee.login }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Новый пароль (оставьте пустым, чтобы не менять)</label>
+                    <input type="text" name="password" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Роли</label>
+                    <select name="roles" class="form-select" multiple size="3">
+                        <option value="user" {% if 'user' in employee.roles %}selected{% endif %}>Пользователь</option>
+                        <option value="issue" {% if 'issue' in employee.roles %}selected{% endif %}>Выдача</option>
+                        <option value="admin" {% if 'admin' in employee.roles %}selected{% endif %}>Администратор</option>
+                    </select>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+            
+            <h6 class="mb-3"><i class="bi bi-shield-lock"></i> Права доступа</h6>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 40%;">Ресурс</th>
+                            <th style="width: 60%;">Уровень доступа</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for resource_key, resource_name in access_resources.items() %}
+                        <tr>
+                            <td>
+                                <strong>{{ resource_name }}</strong>
+                                <small class="text-muted d-block">{{ resource_key }}</small>
+                            </td>
+                            <td>
+                                <select name="perm_{{ resource_key }}" class="form-select">
+                                    {% for level_key, level_name in access_levels.items() %}
+                                    <option value="{{ level_key }}" 
+                                            {% if employee.permissions.get(resource_key) == level_key %}selected{% endif %}>
+                                        {{ level_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить изменения
+                </button>
+                <a href="{{ url_for('ref_employees') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

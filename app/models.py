@@ -228,6 +228,40 @@ def check_permission(employee, resource, level="view"):
     return False
 
 
+def get_active_users():
+    """Получить список активных пользователей в системе (по последним действиям за последний час)."""
+    logs = load_all("action_log")
+    from datetime import datetime, timedelta
+    one_hour_ago = (datetime.now() - timedelta(hours=1)).isoformat()
+    
+    active_user_ids = set()
+    for log in logs:
+        ts = log.get("timestamp", "")
+        if ts >= one_hour_ago:
+            active_user_ids.add(log.get("user_id", ""))
+    
+    employees = get_employees()
+    active_users = []
+    for emp in employees:
+        if emp.get("id") in active_user_ids:
+            active_users.append({
+                "id": emp.get("id"),
+                "full_name": emp.get("full_name"),
+                "login": emp.get("login"),
+                "last_action": None  # Будет заполнено позже при необходимости
+            })
+    
+    # Найдем последнее действие для каждого активного пользователя
+    for user in active_users:
+        user_logs = [log for log in logs if log.get("user_id") == user["id"] and log.get("timestamp", "") >= one_hour_ago]
+        if user_logs:
+            user_logs.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+            user["last_action"] = user_logs[0].get("action", "")
+            user["last_timestamp"] = user_logs[0].get("timestamp", "")
+    
+    return active_users
+
+
 def get_card_history(card_number):
     """Получить историю изменений карты из журнала действий."""
     logs = load_all("action_log")

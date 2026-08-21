@@ -75,5 +75,43 @@
             </div>
         </div>
     </div>
+    {% if is_admin %}
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h6 class="m-0"><i class="bi bi-people"></i> Активные пользователи</h6>
+            </div>
+            <div class="card-body p-0">
+                {% if active_users %}
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>ФИО</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in active_users[:5] %}
+                        <tr>
+                            <td>{{ user.full_name }}</td>
+                            <td><small class="text-muted">{{ user.last_action or '-' }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="p-2 text-center">
+                    <a href="{{ url_for('statistics') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-graph-up"></i> Полная статистика
+                    </a>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <small>Нет активных пользователей</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

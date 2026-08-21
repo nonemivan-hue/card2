@@ -145,6 +145,12 @@
             <a class="nav-link {% if request.endpoint == 'ref_employees' %}active{% endif %}" href="{{ url_for('ref_employees') }}">
                 <i class="bi bi-person-gear"></i> Сотрудники
             </a>
+            <a class="nav-link {% if request.endpoint == 'settings_access' %}active{% endif %}" href="{{ url_for('settings_access') }}">
+                <i class="bi bi-shield-lock"></i> Настройка прав доступа
+            </a>
+            <a class="nav-link {% if request.endpoint == 'statistics' %}active{% endif %}" href="{{ url_for('statistics') }}">
+                <i class="bi bi-graph-up"></i> Статистика
+            </a>
             <a class="nav-link {% if request.endpoint == 'constants' %}active{% endif %}" href="{{ url_for('constants') }}">
                 <i class="bi bi-gear"></i> Константы
             </a>

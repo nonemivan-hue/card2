@@ -29,7 +29,8 @@ from app.models import (
     get_employees, get_employee_by_id, get_employee_by_login, check_permission, get_active_users, update_employee,
     get_documents, get_document_by_id, post_document, delete_document, unpost_document,
     get_cards_report_as_of, get_period_report, get_period_report_detail, get_edo_report, get_summary_report, get_stock_report,
-    CARD_STATUSES, DOCUMENT_TYPES, ACCESS_RESOURCES, ACCESS_LEVELS, log_action, now_iso
+    CARD_STATUSES, DOCUMENT_TYPES, ACCESS_RESOURCES, ACCESS_LEVELS, log_action, now_iso,
+    get_roles, get_role_by_id, create_role, update_role, delete_role
 )
 
 app = Flask(__name__, template_folder="templates", static_folder="static")

@@ -56,6 +56,43 @@ ACCESS_LEVELS = {
     "full": "Полный доступ"
 }
 
+# ============== ROLES FUNCTIONS ==============
+def get_roles():
+    """Получить список всех ролей."""
+    return load_all("roles")
+
+
+def get_role_by_id(role_id):
+    """Получить роль по ID."""
+    return find_one("roles", lambda r: r.get("id") == role_id)
+
+
+def create_role(role_data, user_id=None):
+    """Создать новую роль."""
+    result = insert("roles", role_data)
+    if user_id:
+        log_action(user_id, "CREATE_ROLE", f"Created role {role_data.get('name')}")
+    return result
+
+
+def update_role(role_id, updates, user_id=None):
+    """Обновить данные роли."""
+    result = update("roles", lambda r: r.get("id") == role_id, updates)
+    if user_id:
+        log_action(user_id, "UPDATE_ROLE", f"Updated role {role_id}")
+    return result
+
+
+def delete_role(role_id, user_id=None):
+    """Удалить роль."""
+    role = get_role_by_id(role_id)
+    if role:
+        delete("roles", lambda r: r.get("id") == role_id)
+        if user_id:
+            log_action(user_id, "DELETE_ROLE", f"Deleted role {role.get('name')}")
+        return True
+    return False
+
 
 # ============== HELPERS ==============
 def now_iso():
